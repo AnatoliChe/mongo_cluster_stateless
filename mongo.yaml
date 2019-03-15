@@ -1,0 +1,199 @@
+version: "3.7"
+networks:
+    stacknet:
+            driver: overlay
+            attachable: true
+services:
+  mongo-cfg0:
+    image: mongo
+    networks: 
+      - stacknet
+    ports: 
+      - 26050:26050
+    command: mongod --configsvr --port 26050 --bind_ip_all --replSet c 
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 3
+        delay: 50s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+  mongo-cfg1:
+    image: mongo
+    networks: 
+      - stacknet
+    ports: 
+      - 26051:26051
+    command: mongod --configsvr --port 26051 --bind_ip_all --replSet c
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 3
+        delay: 50s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+  mongo-cfg2:
+    image: mongo
+    networks: 
+      - stacknet
+    ports: 
+      - 26052:26052
+    command: mongod --configsvr --port 26052 --bind_ip_all --replSet c
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 3
+        delay: 50s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+
+  mongo-a0:
+    image: mongo
+    networks: 
+      - stacknet
+    ports: 
+      - 27000:27000
+    command: mongod --shardsvr --port 27000 --bind_ip_all --replSet a --smallfiles --oplogSize 50
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 3
+        delay: 50s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+  mongo-a1:
+    image: mongo
+    networks: 
+      - stacknet
+    ports: 
+      - 27001:27001
+    command: mongod --shardsvr --port 27001 --bind_ip_all --replSet a --smallfiles --oplogSize 50
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 3
+        delay: 50s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+  mongo-a2:
+    image: mongo
+    networks: 
+      - stacknet
+    ports: 
+      - 27002:27002
+    command: mongod --shardsvr --port 27002 --bind_ip_all --replSet a --smallfiles --oplogSize 50
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 3
+        delay: 50s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+  mongo-b0:
+    image: mongo
+    networks: 
+      - stacknet
+    ports: 
+      - 27003:27003
+    command: mongod --shardsvr --port 27003 --bind_ip_all --replSet b --smallfiles --oplogSize 50
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 3
+        delay: 50s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+  mongo-b1:
+    image: mongo
+    networks: 
+      - stacknet
+    ports: 
+      - 27004:27004
+    command: mongod --shardsvr --port 27004 --bind_ip_all --replSet b --smallfiles --oplogSize 50
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 3
+        delay: 50s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+  mongo-b2:
+    image: mongo
+    networks: 
+      - stacknet
+    ports: 
+      - 27005:27005
+    command: mongod --shardsvr --port 27005 --bind_ip_all --replSet b --smallfiles --oplogSize 50
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 3
+        delay: 50s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+  balancer0:
+    image: mongo
+    networks: 
+      - stacknet
+    ports: 
+      - 26060:26060
+    depends_on:
+      - mongo-cfg0
+      - mongo-cfg1
+      - mongo-cfg2 
+    command: mongos --configdb c/mongo-cfg0:26050,mongo-cfg1:26051,mongo-cfg2:26052 --port 26060 --bind_ip_all 
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 3
+        delay: 50s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+  balancer1:
+    image: mongo
+    networks: 
+      - stacknet
+    ports: 
+      - 26061:26061
+    depends_on:
+      - mongo-cfg0
+      - mongo-cfg1
+      - mongo-cfg2 
+    command: mongos --configdb c/mongo-cfg0:26050,mongo-cfg1:26051,mongo-cfg2:26052 --port 26061 --bind_ip_all
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 3
+        delay: 50s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+  balancer2:
+    image: mongo
+    networks: 
+      - stacknet
+    ports: 
+      - 26062:26062
+    depends_on:
+      - mongo-cfg0
+      - mongo-cfg1
+      - mongo-cfg2 
+    command: mongos --configdb c/mongo-cfg0:26050,mongo-cfg1:26051,mongo-cfg2:26052 --port 26062 --bind_ip_all 
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 3
+        delay: 50s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
