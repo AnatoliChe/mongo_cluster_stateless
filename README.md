@@ -5,8 +5,8 @@ Mongodb shareded cluster
 (stateless version only for the testing proposes. If you need real bd You will need 'volumes:' in your yaml file)
 
              [[[   balancers 0 - 3   ]]]
-    [repl set a]       [repl set b]    [cache mongos (repl setc)]
- [[[shards a0-a2]]] [[[shards b0-b2]]]   [[[conf servers c0-c2]]]
+      [repl set a]       [repl set b]    [cache mongos (repl setc)]
+    [[[shards a0-a2]]] [[[shards b0-b2]]]   [[[conf servers c0-c2]]]
 
 #start stack
 docker stack deploy -c mongo.yaml mongo
@@ -36,23 +36,23 @@ docker run --network=mongo_stacknet  -ti mongo  bash -c "echo -e 'use shardTestD
 docker run --network=mongo_stacknet  -ti mongo  bash -c "echo -e 'sh.status()' | mongo --host balancer0 --port 26060"
 
 #You should see something like:
-## databases:
-##        {  "_id" : "config",  "primary" : "config",  "partitioned" : true }
-##        {  "_id" : "shardTestDB",  "primary" : "a",  "partitioned" : true,  "version" : {  "uuid" : UUID("fd203060-eaa2-4e21-b331-9c37cab78ae6"),  "lastMod" : 1 } }
-##                shardTestDB.users
-##                        shard key: { "username" : 1 }
-##                        unique: false
-##                        balancing: true
-##                        chunks:
-##                                a	6
-##                                b	3
-##                        { "username" : { "$minKey" : 1 } } -->> { "username" : "user1" } on : b Timestamp(2, 0) 
-##                        { "username" : "user1" } -->> { "username" : "user17257" } on : b Timestamp(3, 0) 
-##                        { "username" : "user17257" } -->> { "username" : "user24515" } on : b Timestamp(4, 0) 
-##                        { "username" : "user24515" } -->> { "username" : "user31774" } on : a Timestamp(4, 2) 
-##                        { "username" : "user31774" } -->> { "username" : "user39033" } on : a Timestamp(4, 3) 
-##                        { "username" : "user39033" } -->> { "username" : "user4741" } on : a Timestamp(4, 4) 
-##                        { "username" : "user4741" } -->> { "username" : "user6061" } on : a Timestamp(3, 4) 
-##                        { "username" : "user6061" } -->> { "username" : "user8921" } on : a Timestamp(4, 1) 
-##                        { "username" : "user8921" } -->> { "username" : { "$maxKey" : 1 } } on : a Timestamp(3, 1) 
-##
+ databases:
+        {  "_id" : "config",  "primary" : "config",  "partitioned" : true }
+        {  "_id" : "shardTestDB",  "primary" : "a",  "partitioned" : true,  "version" : {  "uuid" : UUID("fd203060-eaa2-4e21-b331-9c37cab78ae6"),  "lastMod" : 1 } }
+                shardTestDB.users
+                        shard key: { "username" : 1 }
+                        unique: false
+                        balancing: true
+                        chunks:
+                                a	6
+                                b	3
+                        { "username" : { "$minKey" : 1 } } -->> { "username" : "user1" } on : b Timestamp(2, 0) 
+                        { "username" : "user1" } -->> { "username" : "user17257" } on : b Timestamp(3, 0) 
+                        { "username" : "user17257" } -->> { "username" : "user24515" } on : b Timestamp(4, 0) 
+                        { "username" : "user24515" } -->> { "username" : "user31774" } on : a Timestamp(4, 2) 
+                        { "username" : "user31774" } -->> { "username" : "user39033" } on : a Timestamp(4, 3) 
+                        { "username" : "user39033" } -->> { "username" : "user4741" } on : a Timestamp(4, 4) 
+                        { "username" : "user4741" } -->> { "username" : "user6061" } on : a Timestamp(3, 4) 
+                        { "username" : "user6061" } -->> { "username" : "user8921" } on : a Timestamp(4, 1) 
+                        { "username" : "user8921" } -->> { "username" : { "$maxKey" : 1 } } on : a Timestamp(3, 1) 
+
