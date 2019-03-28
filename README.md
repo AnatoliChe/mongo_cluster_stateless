@@ -12,28 +12,28 @@ Mongodb shareded cluster
 docker stack deploy -c mongo.yaml mongo
 
 #create shard a
-docker run --network=mongo_stacknet  -ti mongo  bash -c "echo 'rs.initiate({_id : \"a\", members: [{ _id : 0, host : \"mongo-a0:27000\" },{ _id : 1, host : \"mongo-a1:27001\" },{ _id : 2, host : \"mongo-a2:27002\" }]})' | mongo --host mongo-a0 --port 27000"
-docker run --network=mongo_stacknet  -ti mongo  bash -c "echo 'rs.status()' | mongo --host mongo-a0 --port 27000"
+docker run --network=mongo_stacknet  -ti mongo  bash -c "echo 'rs.initiate({_id : \"a\", members: [{ _id : 0, host : \"mongo-a0\" },{ _id : 1, host : \"mongo-a1\" },{ _id : 2, host : \"mongo-a2\" }]})' | mongo --host mongo-a0"
+docker run --network=mongo_stacknet  -ti mongo  bash -c "echo 'rs.status()' | mongo --host mongo-a0"
 
 #create shard b
-docker run --network=mongo_stacknet  -ti mongo  bash -c "echo 'rs.initiate({_id : \"b\", members: [{ _id : 0, host : \"mongo-b0:27003\" },{ _id : 1, host : \"mongo-b1:27004\" },{ _id : 2, host : \"mongo-b2:27005\" }]})' | mongo --host mongo-b0 --port 27003"
-docker run --network=mongo_stacknet  -ti mongo  bash -c "echo 'rs.status()' | mongo --host mongo-b0 --port 27003"
+docker run --network=mongo_stacknet  -ti mongo  bash -c "echo 'rs.initiate({_id : \"b\", members: [{ _id : 0, host : \"mongo-b0\" },{ _id : 1, host : \"mongo-b1\" },{ _id : 2, host : \"mongo-b2\" }]})' | mongo --host mongo-b0"
+docker run --network=mongo_stacknet  -ti mongo  bash -c "echo 'rs.status()' | mongo --host mongo-b0"
 
 #create config servers pool
-docker run --network=mongo_stacknet  -ti mongo  bash -c "echo 'rs.initiate({_id: \"c\",configsvr: true, members: [{ _id : 0, host : \"mongo-cfg0:26050\" },{ _id : 1, host : \"mongo-cfg1:26051\" }, { _id : 2, host : \"mongo-cfg2:26052\" }]})' | mongo --host mongo-cfg0 --port 26050"
-docker run --network=mongo_stacknet  -ti mongo  bash -c "echo 'rs.status()' | mongo --host mongo-cfg0 --port 26050"
+docker run --network=mongo_stacknet  -ti mongo  bash -c "echo 'rs.initiate({_id: \"c\",configsvr: true, members: [{ _id : 0, host : \"mongo-cfg0\" },{ _id : 1, host : \"mongo-cfg1\" }, { _id : 2, host : \"mongo-cfg2\" }]})' | mongo --host mongo-cfg0"
+docker run --network=mongo_stacknet  -ti mongo  bash -c "echo 'rs.status()' | mongo --host mongo-cfg0"
 
 #add shards to balancer
-docker run --network=mongo_stacknet  -ti mongo  bash -c "echo -e 'sh.status()\nsh.addShard(\"a/mongo-a0:27000\")\nsh.addShard(\"b/mongo-b0:27003\")\nsh.status()' | mongo --host balancer0 --port 26060"
+docker run --network=mongo_stacknet  -ti mongo  bash -c "echo -e 'sh.status()\nsh.addShard(\"a/mongo-a0\")\nsh.addShard(\"b/mongo-b0\")\nsh.status()' | mongo --host balancer"
 
 #change chanksize
-docker run --network=mongo_stacknet  -ti mongo  bash -c "echo -e 'use config\ndb.settings.find({\"_id\": \"chunksize\"})\ndb.settings.save({\"_id\": \"chunksize\", value: 1})\n use shardTestDB)' | mongo --host balancer0 --port 26060"
+docker run --network=mongo_stacknet  -ti mongo  bash -c "echo -e 'use config\ndb.settings.find({\"_id\": \"chunksize\"})\ndb.settings.save({\"_id\": \"chunksize\", value: 1})\n use shardTestDB)' | mongo --host balancer"
 
 #Create collection and fullfill with data
-docker run --network=mongo_stacknet  -ti mongo  bash -c "echo -e 'use shardTestDB\nsh.enableSharding(\"shardTestDB\")\nsh.shardCollection(\"shardTestDB.users\", {\"username\": 1})\nfor(var i=0; i<100000; i++){db.users.insert({\"username\": \"user\"+i, \"created at\" : new    Date()}) }\n sh.status()' | mongo --host balancer0 --port 26060"
+docker run --network=mongo_stacknet  -ti mongo  bash -c "echo -e 'use shardTestDB\nsh.enableSharding(\"shardTestDB\")\nsh.shardCollection(\"shardTestDB.users\", {\"username\": 1})\nfor(var i=0; i<100000; i++){db.users.insert({\"username\": \"user\"+i, \"created at\" : new    Date()}) }\n sh.status()' | mongo --host balancer"
 
 #Check status and balancing of data
-docker run --network=mongo_stacknet  -ti mongo  bash -c "echo -e 'sh.status()' | mongo --host balancer0 --port 26060"
+docker run --network=mongo_stacknet  -ti mongo  bash -c "echo -e 'sh.status()' | mongo --host balancer"
 
 #You should see something like:
 ## databases:
